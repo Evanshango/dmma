@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">DMgnt</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="log_in">Log In</string>
+    <string name="register">Register</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="don_t_have_an_account">Don\'t have an account ? </string>
+    <string name="already_have_an_account">Already have an account ? </string>
+    <string name="register_here">Register here</string>
+    <string name="login_here">Login here</string>
+    <string name="please_login_to_proceed">Please Provide your credentials to Proceed</string>
+    <string name="please_register_to_proceed">We just need to get a few details to get you registered for our services</string>
+    <string name="email">Email</string>
+    <string name="logo">logo</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="disaster_management">Disaster Management</string>
+    <string name="events">Events</string>
+    <string name="help">Help</string>
+    <string name="emergency">Emergency</string>
 </resources>

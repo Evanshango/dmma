@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/eventsFragment"
+        android:icon="@drawable/ic_events"
+        android:menuCategory="system"
+        android:title="@string/events" />
+    <item
+        android:id="@+id/emergencyFragment"
+        android:icon="@drawable/ic_emergency"
+        android:menuCategory="system"
+        android:title="@string/emergency" />
+    <item
+        android:id="@+id/helpFragment"
+        android:icon="@drawable/ic_help"
+        android:menuCategory="system"
+        android:title="@string/help" />
+</menu>
