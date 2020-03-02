@@ -20,4 +20,13 @@
     <string name="events">Events</string>
     <string name="help">Help</string>
     <string name="emergency">Emergency</string>
+    <string name="_20">20</string>
+    <string name="home">Home</string>
+    <string name="sample_text">Sample Text</string>
+    <string name="your_location">Your Location</string>
+    <string name="remarks">Remarks</string>
+    <string name="proceed">Proceed</string>
+    <string name="enter_some_remarks">Enter some remarks..</string>
+    <string name="category">Category</string>
+    <string name="category_info">Search your Category and choose from the dropdown</string>
 </resources>

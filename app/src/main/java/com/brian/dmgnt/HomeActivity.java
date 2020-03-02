@@ -1,6 +1,7 @@
 package com.brian.dmgnt;
 
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,7 @@ public class HomeActivity extends AppCompatActivity {
     private NavController mNavController;
     private long backPressedTime;
     private Toast backToast;
+    private TextView btnToNotifications;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,18 @@ public class HomeActivity extends AppCompatActivity {
         mNavController = Navigation.findNavController(this, R.id.homeHostFragment);
 
         NavigationUI.setupWithNavController(bottomNav, mNavController);
+
+        initViews();
+
+        btnToNotifications.setOnClickListener(v -> toNotifications());
+    }
+
+    private void initViews() {
+        btnToNotifications = findViewById(R.id.btnToNotifications);
+    }
+
+    private void toNotifications() {
+        Toast.makeText(this, "To notifications", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -38,7 +52,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         int id = Objects.requireNonNull(mNavController.getCurrentDestination()).getId();
-        if (id == R.id.eventsFragment) {
+        if (id == R.id.homeFragment) {
             if (backPressedTime + 2000 > System.currentTimeMillis()) {
                 backToast.cancel();
                 finish();

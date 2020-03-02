@@ -10,4 +10,5 @@
     <color name="textColor">#26282a</color>
     <color name="tabTextColor">#828282</color>
     <color name="colorDarkGrey">#2E2D2D</color>
+    <color name="helpBackground">#787878</color>
 </resources>

@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
+        android:background="@color/background"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium">
         <androidx.appcompat.widget.Toolbar
@@ -22,12 +23,26 @@
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium">
 
-            <TextView
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/disaster_management"
-                android:textAllCaps="true"
-                android:textAlignment="center"/>
+                android:layout_height="match_parent">
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/disaster_management"
+                    android:src="@drawable/logo"/>
+                <TextView
+                    android:id="@+id/btnToNotifications"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:drawableStart="@drawable/ic_notifications"
+                    android:textColor="@color/colorAccent"
+                    android:text="@string/_20"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_margin="16dp"
+                    android:textSize="@dimen/notificationText"/>
+            </RelativeLayout>
 
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
@@ -39,7 +54,8 @@
         android:layout_height="match_parent"
         app:defaultNavHost="true"
         android:layout_below="@id/abb_bar"
-        app:navGraph="@navigation/home_nav_graph" />
+        app:navGraph="@navigation/home_nav_graph"
+        android:layout_above="@id/bottom_navigation"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
