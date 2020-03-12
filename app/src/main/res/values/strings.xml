@@ -1,4 +1,5 @@
 <resources>
+    <string name="API_KEY">AIzaSyDjHtC-8ynLlvAwbpqkb-vB7KAygzGRDmI</string>
     <string name="app_name">DMgnt</string>
     <string name="forgot_password">Forgot Password?</string>
     <string name="log_in">Log In</string>
@@ -29,4 +30,5 @@
     <string name="enter_some_remarks">Enter some remarks..</string>
     <string name="category">Category</string>
     <string name="category_info">Search your Category and choose from the dropdown</string>
+    <string name="username">Username</string>
 </resources>

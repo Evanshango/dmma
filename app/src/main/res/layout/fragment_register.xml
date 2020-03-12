@@ -59,6 +59,18 @@
                 android:orientation="vertical"
                 android:padding="16dp">
                 <EditText
+                    android:id="@+id/regUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/username"
+                    android:drawableStart="@drawable/ic_email"
+                    android:drawablePadding="8dp"
+                    android:background="@drawable/input_fields"
+                    android:padding="10dp"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:layout_margin="8dp"/>
+                <EditText
                     android:id="@+id/regEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -95,7 +107,7 @@
                     android:background="@drawable/input_fields"
                     android:padding="10dp"/>
                 <Button
-                    android:id="@+id/btnLogin"
+                    android:id="@+id/btnReg"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:text="@string/register"
