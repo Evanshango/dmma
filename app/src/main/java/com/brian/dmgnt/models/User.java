@@ -4,6 +4,9 @@ public class User {
 
     private String userId, username, email;
 
+    public User() {
+    }
+
     public User(String userId, String username, String email) {
         this.userId = userId;
         this.username = username;

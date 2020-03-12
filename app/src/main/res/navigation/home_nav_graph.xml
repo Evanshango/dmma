@@ -23,5 +23,9 @@
         android:id="@+id/helpFragment"
         android:name="com.brian.dmgnt.fragments.HelpFragment"
         android:label="fragment_help"
-        tools:layout="@layout/fragment_help" />
+        tools:layout="@layout/fragment_help" >
+        <action
+            android:id="@+id/action_helpFragment_to_eventsFragment"
+            app:destination="@id/eventsFragment" />
+    </fragment>
 </navigation>

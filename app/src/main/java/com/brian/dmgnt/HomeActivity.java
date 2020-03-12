@@ -23,6 +23,9 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
+import com.brian.dmgnt.helpers.UserClient;
+import com.brian.dmgnt.models.User;
+import com.brian.dmgnt.models.UserLocation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -30,6 +33,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.Objects;
@@ -37,6 +42,8 @@ import java.util.Objects;
 import static com.brian.dmgnt.helpers.Constants.ERROR_DIALOG_REQUEST;
 import static com.brian.dmgnt.helpers.Constants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION;
 import static com.brian.dmgnt.helpers.Constants.PERMISSION_REQUEST_ENABLE_GPS;
+import static com.brian.dmgnt.helpers.Constants.USERS_REF;
+import static com.brian.dmgnt.helpers.Constants.USER_LOCATION;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -48,6 +55,9 @@ public class HomeActivity extends AppCompatActivity {
     private boolean mLocationPermissionGranted = false;
     private FusedLocationProviderClient mFusedLocationClient;
     private FirebaseAuth mAuth;
+    private UserLocation mUserLocation;
+    private FirebaseFirestore mDatabase;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +65,7 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
         mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseFirestore.getInstance();
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         final BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
@@ -68,14 +79,50 @@ public class HomeActivity extends AppCompatActivity {
         btnToNotifications.setOnClickListener(v -> toNotifications());
     }
 
-    private void getLastKnownLocation(){
+    private void getUserDetails() {
+        if (mUserLocation == null) {
+            mUserLocation = new UserLocation();
+            DocumentReference userRef = mDatabase.collection(USERS_REF).document(userId);
+            userRef.get().addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    User user = documentSnapshot.toObject(User.class);
+                    mUserLocation.setUser(user);
+                    ((UserClient)getApplicationContext()).setUser(user);
+                    getLastKnownLocation();
+                } else {
+                    getLastKnownLocation();
+                }
+            });
+        }
+    }
+
+    private void saveUserLocation() {
+        if (mUserLocation != null) {
+            DocumentReference locationRef = mDatabase.collection(USER_LOCATION)
+                    .document(userId);
+            locationRef.set(mUserLocation).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Log.d(TAG, "saveUserLocation: \ninserted user location into database." +
+                            "\n latitude: " + mUserLocation.getGeoPoint().getLatitude() +
+                            "\n longitude: " + mUserLocation.getGeoPoint().getLongitude());
+                } else {
+                    Toast.makeText(this, "An error occurred getting user location", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Log.d(TAG, "saveUserLocation: Unable to get user location");
+        }
+    }
+
+    private void getLastKnownLocation() {
         mFusedLocationClient.getLastLocation().addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
+            if (task.isSuccessful()) {
                 Location location = task.getResult();
                 if (location != null) {
                     GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
-                    Log.d(TAG, "getLastKnownLocation: latitude " + geoPoint.getLatitude());
-                    Log.d(TAG, "getLastKnownLocation: longitude " + geoPoint.getLongitude());
+                    mUserLocation.setGeoPoint(geoPoint);
+                    mUserLocation.setTimestamp(null);
+                    saveUserLocation();
                 }
             }
         });
@@ -104,7 +151,7 @@ public class HomeActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
-            getLastKnownLocation();
+            getUserDetails();
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
@@ -114,9 +161,9 @@ public class HomeActivity extends AppCompatActivity {
 
     public boolean isServiceOk() {
         int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
-        if (available == ConnectionResult.SUCCESS){
+        if (available == ConnectionResult.SUCCESS) {
             return true;
-        } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)){
+        } else if (GoogleApiAvailability.getInstance().isUserResolvableError(available)) {
             Dialog dialog = GoogleApiAvailability.getInstance()
                     .getErrorDialog(this, available, ERROR_DIALOG_REQUEST);
             dialog.show();
@@ -143,7 +190,7 @@ public class HomeActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == PERMISSION_REQUEST_ENABLE_GPS) {
             if (mLocationPermissionGranted) {
-                getLastKnownLocation();
+                getUserDetails();
             } else {
                 getLocationPermission();
             }
@@ -195,9 +242,9 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (checkMapServices()){
-            if (mLocationPermissionGranted){
-                getLastKnownLocation();
+        if (checkMapServices()) {
+            if (mLocationPermissionGranted) {
+                getUserDetails();
             } else {
                 getLocationPermission();
             }
@@ -208,10 +255,10 @@ public class HomeActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null){
+        if (user == null) {
             toAuthActivity();
         } else {
-            Toast.makeText(this, "Authenticated with " + user.getEmail(), Toast.LENGTH_SHORT).show();
+            userId = user.getUid();
         }
     }
 

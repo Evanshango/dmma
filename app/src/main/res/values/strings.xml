@@ -26,9 +26,12 @@
     <string name="sample_text">Sample Text</string>
     <string name="your_location">Your Location</string>
     <string name="remarks">Remarks</string>
-    <string name="proceed">Proceed</string>
     <string name="enter_some_remarks">Enter some remarks..</string>
     <string name="category">Category</string>
     <string name="category_info">Search your Category and choose from the dropdown</string>
     <string name="username">Username</string>
+    <string name="please_confirm">Please Confirm</string>
+    <string name="proceed">Proceed</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm_info">Is this the correct image. If so please select Proceed or cancel to choose another image</string>
 </resources>
