@@ -105,7 +105,7 @@ public class RegisterFragment extends Fragment {
                 String error = Objects.requireNonNull(task.getException()).getMessage();
                 Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
             }
-        }).addOnFailureListener(e -> Toast.makeText(getContext(), "An error occurred",
+        }).addOnFailureListener(e -> Toast.makeText(getContext(), e.getMessage(),
                 Toast.LENGTH_SHORT).show());
     }
 

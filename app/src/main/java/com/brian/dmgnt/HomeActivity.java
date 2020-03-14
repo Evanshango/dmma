@@ -54,17 +54,17 @@ public class HomeActivity extends AppCompatActivity {
     private TextView btnToNotifications;
     private boolean mLocationPermissionGranted = false;
     private FusedLocationProviderClient mFusedLocationClient;
-    private FirebaseAuth mAuth;
     private UserLocation mUserLocation;
     private FirebaseFirestore mDatabase;
     private String userId;
+    private FirebaseUser mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        mAuth = FirebaseAuth.getInstance();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
         mDatabase = FirebaseFirestore.getInstance();
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -74,9 +74,12 @@ public class HomeActivity extends AppCompatActivity {
 
         NavigationUI.setupWithNavController(bottomNav, mNavController);
 
+        mUser = auth.getCurrentUser();
+
         initViews();
 
         btnToNotifications.setOnClickListener(v -> toNotifications());
+
     }
 
     private void getUserDetails() {
@@ -254,11 +257,10 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) {
+        if (mUser == null) {
             toAuthActivity();
         } else {
-            userId = user.getUid();
+            userId = mUser.getUid();
         }
     }
 
@@ -267,4 +269,22 @@ public class HomeActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
+
+//    private void getIncidents() {
+//        List<Incident> incidents = new ArrayList<>();
+//        incidentsCollection.get().addOnSuccessListener(queryDocumentSnapshots -> {
+//            if (queryDocumentSnapshots != null) {
+//                incidents.addAll(queryDocumentSnapshots.toObjects(Incident.class));
+//                emitIncidents(incidents);
+//            } else {
+//                Log.d(TAG, "getIncidents: No incidents");
+//            }
+//        }).addOnFailureListener(e -> Log.d(TAG, "getIncidents: An error occurred"));
+//    }
+
+//    private void emitIncidents(List<Incident> incidents) {
+//        IncidentEvent event = new IncidentEvent();
+//        event.setIncidents(incidents);
+//        EventBus.getDefault().postSticky(event);
+//    }
 }

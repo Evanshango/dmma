@@ -26,15 +26,23 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.brian.dmgnt.R;
-import com.brian.dmgnt.helpers.UserClient;
 import com.brian.dmgnt.models.Incident;
 import com.brian.dmgnt.models.UserLocation;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,10 +53,12 @@ import static android.app.Activity.RESULT_OK;
 import static com.brian.dmgnt.helpers.Constants.GALLERY_REQUEST_CODE;
 import static com.brian.dmgnt.helpers.Constants.INCIDENTS;
 import static com.brian.dmgnt.helpers.Constants.LONG_DATE;
+import static com.brian.dmgnt.helpers.Constants.MAP_VIEW_BUNDLE_KEY;
+import static com.brian.dmgnt.helpers.Constants.SHORT_DATE;
 import static com.brian.dmgnt.helpers.Constants.UPLOADS;
 import static com.brian.dmgnt.helpers.Constants.USER_LOCATION;
 
-public class HelpFragment extends Fragment {
+public class HelpFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String TAG = "HelpFragment";
     private ImageView mImageView;
@@ -57,21 +67,57 @@ public class HelpFragment extends Fragment {
     private AutoCompleteTextView category;
     private Button btnProceed;
     private CollectionReference incidentCollection;
-    private String incidentId, userId, timestamp;
+    private String incidentId, date, time, imageUrl, userId;
     private GeoPoint mGeoPoint;
     private NavController mNavController;
-    private String imageUrl;
     private StorageReference mStorageReference;
+    private GoogleMap mGoogleMap;
+    private MapView userMapLocation;
+    private LatLngBounds mMapBounds;
+    private CollectionReference locationsCollection;
+    private double bottomBoundary, leftBoundary, rightBoundary, topBoundary;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_help, container, false);
+
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        mStorageReference = FirebaseStorage.getInstance().getReference(UPLOADS);
+
+        incidentCollection = database.collection(INCIDENTS);
+        locationsCollection = database.collection(USER_LOCATION);
+        incidentId = incidentCollection.document().getId();
+
+        time = new SimpleDateFormat(LONG_DATE, Locale.getDefault()).format(new Date());
+        date = new SimpleDateFormat(SHORT_DATE, Locale.getDefault()).format(new Date());
+
         initViews(view);
+        initGoogleMap(savedInstanceState);
+
+        if (user != null) {
+            userId = user.getUid();
+            getUserLocation(userId);
+        } else {
+            Log.d(TAG, "onCreateView: User not logged in");
+        }
+
         return view;
     }
 
+    private void initGoogleMap(Bundle savedInstanceState) {
+        Bundle mapViewBundle = null;
+        if (savedInstanceState != null) {
+            mapViewBundle = savedInstanceState.getBundle(MAP_VIEW_BUNDLE_KEY);
+        }
+        userMapLocation.onCreate(mapViewBundle);
+        userMapLocation.getMapAsync(this);
+    }
+
     private void initViews(View view) {
+        userMapLocation = view.findViewById(R.id.userMap);
         mImageView = view.findViewById(R.id.openGallery);
         helpRemarks = view.findViewById(R.id.helpRemarks);
         category = view.findViewById(R.id.chooseCategory);
@@ -112,7 +158,7 @@ public class HelpFragment extends Fragment {
 
     private void doMakeRequest(String selectedCategory, String remarks) {
         Incident incident = new Incident(
-                incidentId, selectedCategory, imageUrl, remarks, userId, mGeoPoint, timestamp
+                incidentId, selectedCategory, imageUrl, remarks, userId, mGeoPoint, date, time
         );
         incidentCollection.document(incidentId).set(incident).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -124,33 +170,6 @@ public class HelpFragment extends Fragment {
                 Toast.LENGTH_SHORT).show());
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
-        mStorageReference = FirebaseStorage.getInstance().getReference(UPLOADS);
-        incidentCollection = database.collection(INCIDENTS);
-
-        incidentId = incidentCollection.document().getId();
-        userId = ((UserClient) Objects.requireNonNull(getActivity()).getApplicationContext())
-                .getUser().getUserId();
-        DocumentReference userLocationRef = database.collection(USER_LOCATION).document(userId);
-
-        timestamp = new SimpleDateFormat(LONG_DATE, Locale.getDefault()).format(new Date());
-
-        userLocationRef.get().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                UserLocation location = documentSnapshot.toObject(UserLocation.class);
-                if (location != null) {
-                    mGeoPoint = location.getGeoPoint();
-                } else {
-                    Log.d(TAG, "onActivityCreated: Unable to get user location");
-                }
-            } else {
-                Toast.makeText(getContext(), "Unable to get user info", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     private void openGallery() {
         Intent intent = new Intent();
@@ -230,5 +249,82 @@ public class HelpFragment extends Fragment {
         ContentResolver contentResolver = Objects.requireNonNull(getContext()).getContentResolver();
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
         return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(imageUri));
+    }
+
+    private void getUserLocation(String userId) {
+        locationsCollection.document(userId).get().addOnSuccessListener(documentSnapshot -> {
+            UserLocation userLocation = documentSnapshot.toObject(UserLocation.class);
+            if (userLocation != null) {
+                mGeoPoint = userLocation.getGeoPoint();
+            } else {
+                Log.d(TAG, "onActivityCreated: Unable to get user location");
+            }
+            setMapBounds(userLocation);
+        });
+    }
+
+    private void setMapBounds(UserLocation userLocation) {
+        if (userLocation != null) {
+            bottomBoundary = userLocation.getGeoPoint().getLatitude() - .1;
+            leftBoundary = userLocation.getGeoPoint().getLongitude() - .1;
+            topBoundary = userLocation.getGeoPoint().getLatitude() + .1;
+            rightBoundary = userLocation.getGeoPoint().getLongitude() + .1;
+        } else {
+            Log.d(TAG, "setMapBounds: Unable to fetch user location");
+        }
+    }
+
+    private void setCameraView() {
+        mMapBounds = new LatLngBounds(new LatLng(bottomBoundary, leftBoundary),
+                new LatLng(topBoundary, rightBoundary));
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mMapBounds, 0));
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Bundle mapViewBundle = outState.getBundle(MAP_VIEW_BUNDLE_KEY);
+        if (mapViewBundle == null) {
+            mapViewBundle = new Bundle();
+            outState.putBundle(MAP_VIEW_BUNDLE_KEY, mapViewBundle);
+        }
+        userMapLocation.onSaveInstanceState(mapViewBundle);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        userMapLocation.onResume();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        userMapLocation.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        userMapLocation.onStop();
+    }
+
+    @Override
+    public void onPause() {
+        userMapLocation.onPause();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        userMapLocation.onDestroy();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        googleMap.setMyLocationEnabled(true);
+        mGoogleMap = googleMap;
+        setCameraView();
     }
 }

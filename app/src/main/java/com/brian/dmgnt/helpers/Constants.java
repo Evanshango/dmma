@@ -11,5 +11,7 @@ public class Constants {
     public static final String INCIDENTS = "incidents";
     public static final int GALLERY_REQUEST_CODE = 1004;
     public static final String LONG_DATE = "dd MMM yyyy HH:mm";
+    public static final String SHORT_DATE = "dd MMM yyyy";
     public static final String UPLOADS = "uploads";
+    public static final String USER_ID = "userId";
 }

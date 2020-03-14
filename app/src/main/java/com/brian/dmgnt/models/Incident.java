@@ -4,21 +4,22 @@ import com.google.firebase.firestore.GeoPoint;
 
 public class Incident {
 
-    private String incidentId, category, imageUrl, description, userId, timestamp;
+    private String incidentId, category, imageUrl, description, userId, date, time;
     private GeoPoint mGeoPoint;
 
     public Incident() {
     }
 
     public Incident(String incidentId, String category, String imageUrl, String description,
-                    String userId, GeoPoint geoPoint, String timestamp) {
+                    String userId, GeoPoint geoPoint, String date, String time) {
         this.incidentId = incidentId;
         this.category = category;
         this.imageUrl = imageUrl;
         this.description = description;
         this.userId = userId;
         mGeoPoint = geoPoint;
-        this.timestamp = timestamp;
+        this.date = date;
+        this.time = time;
     }
 
     public String getIncidentId() {
@@ -69,11 +70,19 @@ public class Incident {
         mGeoPoint = geoPoint;
     }
 
-    public String getTimestamp() {
-        return timestamp;
+    public String getDate() {
+        return date;
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }

@@ -27,14 +27,15 @@
                     android:layout_marginBottom="10dp"
                     android:textColor="@color/colorWhite"/>
 
-                <androidx.cardview.widget.CardView
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    app:cardCornerRadius="5dp"
-                    android:layout_margin="1dp"
-                    android:backgroundTint="@color/lightGrey">
+                    android:layout_height="150dp">
+                    <com.google.android.gms.maps.MapView
+                        android:id="@+id/userMap"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+                </FrameLayout>
 
-                </androidx.cardview.widget.CardView>
             </LinearLayout>
             <TextView
                 android:layout_width="match_parent"
