@@ -29,7 +29,7 @@
 
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="150dp">
+                    android:layout_height="180dp">
                     <com.google.android.gms.maps.MapView
                         android:id="@+id/userMap"
                         android:layout_width="match_parent"
@@ -68,7 +68,7 @@
                     android:id="@+id/openGallery"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/ic_camera"
+                    android:background="@drawable/ic_camera"
                     android:scaleType="centerCrop"
                     android:layout_gravity="center"/>
 

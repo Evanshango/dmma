@@ -1,12 +1,14 @@
 package com.brian.dmgnt;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -26,6 +28,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.brian.dmgnt.helpers.UserClient;
 import com.brian.dmgnt.models.User;
 import com.brian.dmgnt.models.UserLocation;
+import com.brian.dmgnt.services.LocationService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -82,6 +85,29 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
+    private void startLocationService() {
+        if (!isLocationServiceRunning()) {
+            Intent serviceIntent = new Intent(this, LocationService.class);
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+                HomeActivity.this.startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);
+            }
+        }
+    }
+
+    private boolean isLocationServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo serviceInfo : manager.getRunningServices(Integer.MAX_VALUE)){
+            if ("com.brian.dmgnt.services.LocationService".equals(serviceInfo.service.getClassName())){
+                Log.d(TAG, "isLocationServiceRunning: location service is already running");
+                return true;
+            }
+        }
+        Log.d(TAG, "isLocationServiceRunning: location service is not running");
+        return false;
+    }
+
     private void getUserDetails() {
         if (mUserLocation == null) {
             mUserLocation = new UserLocation();
@@ -90,7 +116,7 @@ public class HomeActivity extends AppCompatActivity {
                 if (documentSnapshot.exists()) {
                     User user = documentSnapshot.toObject(User.class);
                     mUserLocation.setUser(user);
-                    ((UserClient)getApplicationContext()).setUser(user);
+                    ((UserClient) getApplicationContext()).setUser(user);
                     getLastKnownLocation();
                 } else {
                     getLastKnownLocation();
@@ -126,6 +152,7 @@ public class HomeActivity extends AppCompatActivity {
                     mUserLocation.setGeoPoint(geoPoint);
                     mUserLocation.setTimestamp(null);
                     saveUserLocation();
+                    startLocationService();
                 }
             }
         });
@@ -269,22 +296,4 @@ public class HomeActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
-
-//    private void getIncidents() {
-//        List<Incident> incidents = new ArrayList<>();
-//        incidentsCollection.get().addOnSuccessListener(queryDocumentSnapshots -> {
-//            if (queryDocumentSnapshots != null) {
-//                incidents.addAll(queryDocumentSnapshots.toObjects(Incident.class));
-//                emitIncidents(incidents);
-//            } else {
-//                Log.d(TAG, "getIncidents: No incidents");
-//            }
-//        }).addOnFailureListener(e -> Log.d(TAG, "getIncidents: An error occurred"));
-//    }
-
-//    private void emitIncidents(List<Incident> incidents) {
-//        IncidentEvent event = new IncidentEvent();
-//        event.setIncidents(incidents);
-//        EventBus.getDefault().postSticky(event);
-//    }
 }

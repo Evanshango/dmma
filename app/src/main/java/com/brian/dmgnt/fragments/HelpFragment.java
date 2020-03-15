@@ -33,7 +33,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -41,8 +41,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -73,9 +71,7 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
     private StorageReference mStorageReference;
     private GoogleMap mGoogleMap;
     private MapView userMapLocation;
-    private LatLngBounds mMapBounds;
     private CollectionReference locationsCollection;
-    private double bottomBoundary, leftBoundary, rightBoundary, topBoundary;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -256,28 +252,19 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
             UserLocation userLocation = documentSnapshot.toObject(UserLocation.class);
             if (userLocation != null) {
                 mGeoPoint = userLocation.getGeoPoint();
+                setMyLocation(mGeoPoint, mGoogleMap);
             } else {
                 Log.d(TAG, "onActivityCreated: Unable to get user location");
             }
-            setMapBounds(userLocation);
         });
     }
 
-    private void setMapBounds(UserLocation userLocation) {
-        if (userLocation != null) {
-            bottomBoundary = userLocation.getGeoPoint().getLatitude() - .1;
-            leftBoundary = userLocation.getGeoPoint().getLongitude() - .1;
-            topBoundary = userLocation.getGeoPoint().getLatitude() + .1;
-            rightBoundary = userLocation.getGeoPoint().getLongitude() + .1;
-        } else {
-            Log.d(TAG, "setMapBounds: Unable to fetch user location");
-        }
-    }
-
-    private void setCameraView() {
-        mMapBounds = new LatLngBounds(new LatLng(bottomBoundary, leftBoundary),
-                new LatLng(topBoundary, rightBoundary));
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mMapBounds, 0));
+    private void setMyLocation(GeoPoint geoPoint, GoogleMap googleMap) {
+        LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
+        googleMap.addMarker(new MarkerOptions().position(latLng).title("My Location")
+                .snippet("I'm here"));
+        googleMap.animateCamera(CameraUpdateFactory.zoomTo(18f));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12f));
     }
 
     @Override
@@ -325,6 +312,5 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         googleMap.setMyLocationEnabled(true);
         mGoogleMap = googleMap;
-        setCameraView();
     }
 }
