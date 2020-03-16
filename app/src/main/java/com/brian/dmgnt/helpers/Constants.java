@@ -14,8 +14,8 @@ public class Constants {
     public static final String SHORT_DATE = "dd MMM yyyy";
     public static final String UPLOADS = "uploads";
     public static final String USER_ID = "userId";
-    public static final long UPDATE_INTERVAL = 4000; /* 4 secs */
-    public static final long FASTEST_INTERVAL = 2000; /* 2 secs */
+    public static final long UPDATE_INTERVAL = 10000; /* 4 secs */
+    public static final long FASTEST_INTERVAL = 4000; /* 2 secs */
     public static final int MAP_CONTRACTED = 0;
     public static final int MAP_EXPANDED = 1;
 }

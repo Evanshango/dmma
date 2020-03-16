@@ -34,4 +34,8 @@
     <string name="proceed">Proceed</string>
     <string name="cancel">Cancel</string>
     <string name="confirm_info">Is this the correct image. If so please select Proceed or cancel to choose another image</string>
+    <string name="emergency_contact_name">Emergency Contact Name</string>
+    <string name="info">Info</string>
+    <string name="call">Call</string>
+    <string name="t">T</string>
 </resources>
