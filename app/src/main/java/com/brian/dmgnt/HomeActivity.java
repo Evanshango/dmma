@@ -253,7 +253,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         int id = Objects.requireNonNull(mNavController.getCurrentDestination()).getId();
-        if (id == R.id.homeFragment) {
+        if (id == R.id.eventsFragment) {
             if (backPressedTime + 2000 > System.currentTimeMillis()) {
                 backToast.cancel();
                 finish();

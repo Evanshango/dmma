@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.brian.dmgnt.R;
@@ -17,6 +18,7 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.Item
 
     private List<Selection> mSelections;
     private SelectedItem mSelectedItem;
+    private double height;
 
     public SelectionAdapter(List<Selection> selections, SelectedItem selectedItem) {
         mSelections = selections;
@@ -28,6 +30,7 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.Item
     public ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.selection_item, parent, false);
+        height = parent.getMeasuredHeight() * 0.5;
         return new ItemHolder(view, mSelectedItem);
     }
 
@@ -45,11 +48,18 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.Item
 
         TextView selectionName;
         SelectedItem mSelectedItem;
+        CardView selectionCard;
 
         ItemHolder(@NonNull View itemView, SelectedItem selectedItem) {
             super(itemView);
+            double finalHeight = height * 0.75;
             mSelectedItem = selectedItem;
             selectionName = itemView.findViewById(R.id.selectionName);
+            selectionCard = itemView.findViewById(R.id.selectionCard);
+
+            selectionCard.setMinimumHeight((int) finalHeight);
+            selectionName.setMinHeight((int) finalHeight);
+
             itemView.setOnClickListener(this);
         }
 
@@ -63,7 +73,7 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.Item
         }
     }
 
-    public interface SelectedItem{
+    public interface SelectedItem {
 
         void itemSelected(Selection selection);
     }

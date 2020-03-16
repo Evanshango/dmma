@@ -1,13 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:weightSum="100"
     tools:context=".fragments.EventsFragment">
 
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/map"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:weightSum="100"
+        android:orientation="vertical">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/selectionRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="60"
+            tools:listitem="@layout/selection_item" />
 
-</FrameLayout>
+        <RelativeLayout
+            android:id="@+id/mapContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="40">
+            <com.google.android.gms.maps.MapView
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <ImageView
+                android:id="@+id/btnFullScreenMap"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:background="@color/colorWhite"
+                android:src="@drawable/ic_fullscreen"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="10dp"/>
+
+            <ImageView
+                android:id="@+id/btnResetMap"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:background="@color/colorWhite"
+                android:src="@drawable/ic_refresh"
+                android:layout_margin="10dp"/>
+
+        </RelativeLayout>
+    </LinearLayout>
+
+</RelativeLayout>
