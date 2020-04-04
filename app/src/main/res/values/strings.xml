@@ -41,4 +41,6 @@
     <string name="error_fetch">Unable to Fetch Emergency Contact List</string>
     <string name="contact_name_placeholder">Contact Name</string>
     <string name="close">Close</string>
+    <string name="incident_msg">You reported an incident</string>
+    <string name="_ok">OK</string>
 </resources>

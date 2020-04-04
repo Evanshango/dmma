@@ -71,7 +71,7 @@ public class HomeActivity extends AppCompatActivity {
     private UserLocation mUserLocation;
     private FirebaseFirestore mDatabase;
     private CollectionReference notsCollection;
-    private String userId;
+    private String userId, userName;
     private FirebaseUser mUser;
 
     @Override
@@ -93,14 +93,10 @@ public class HomeActivity extends AppCompatActivity {
         mUser = auth.getCurrentUser();
         userId = mUser != null ? mUser.getUid() : null;
         initViews();
-
         getNotifications();
-
-//        btnToNotifications.setOnClickListener(v -> toNotifications());
     }
 
     private void getNotifications() {
-        Log.d(TAG, "getNotifications: userId: " + userId);
         if (userId != null) {
             Query query = notsCollection.document(userId).collection(NOTIFICATIONS)
                     .whereEqualTo(RECEIVER, userId).whereEqualTo(READ, false)
@@ -125,6 +121,7 @@ public class HomeActivity extends AppCompatActivity {
         btnToNotifications.setText(String.valueOf(totalNotifications));
         btnToNotifications.setOnClickListener(v -> {
             Intent intent = new Intent(this, NotificationActivity.class);
+            intent.putExtra("username", userName);
             intent.putParcelableArrayListExtra("notifications", (ArrayList<Notification>) notifications);
             startActivity(intent);
         });
@@ -161,6 +158,7 @@ public class HomeActivity extends AppCompatActivity {
                 if (documentSnapshot.exists()) {
                     User user = documentSnapshot.toObject(User.class);
                     mUserLocation.setUser(user);
+                    userName = user.getUsername();
                     ((UserClient) getApplicationContext()).setUser(user);
                     getLastKnownLocation();
                 } else {
