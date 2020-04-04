@@ -32,15 +32,14 @@
                     android:text="@string/disaster_management"
                     android:src="@drawable/logo"/>
                 <TextView
-                    android:id="@+id/btnToNotifications"
+                    android:id="@+id/txtNotifications"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:drawableStart="@drawable/ic_notifications"
                     android:textColor="@color/colorAccent"
-                    android:text="@string/_20"
                     android:layout_centerVertical="true"
                     android:layout_alignParentEnd="true"
-                    android:layout_margin="16dp"
+                    android:layout_margin="8dp"
                     android:textSize="@dimen/notificationText"/>
             </RelativeLayout>
 

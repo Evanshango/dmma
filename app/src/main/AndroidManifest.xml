@@ -5,13 +5,13 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
-        android:required="true"/>
+        android:required="true" />
 
     <application
         android:name=".helpers.UserClient"
@@ -23,6 +23,8 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
+        <activity android:name=".NotificationActivity"></activity>
+        <activity android:name=".InfoItemActivity" />
         <activity
             android:name=".HomeActivity"
             android:windowSoftInputMode="adjustPan">
@@ -32,7 +34,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AuthActivity"/>
+        <activity android:name=".AuthActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -40,11 +42,14 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
-        <service android:name=".services.LocationService"
-            android:stopWithTask="true"/>
+
+        <service
+            android:name=".services.LocationService"
+            android:stopWithTask="true" />
     </application>
 
 </manifest>

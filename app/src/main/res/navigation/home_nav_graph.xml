@@ -8,7 +8,11 @@
         android:id="@+id/eventsFragment"
         android:name="com.brian.dmgnt.fragments.EventsFragment"
         android:label="fragment_events"
-        tools:layout="@layout/fragment_events" />
+        tools:layout="@layout/fragment_events" >
+        <argument
+            android:name="infoId"
+            app:argType="string" />
+    </fragment>
     <fragment
         android:id="@+id/emergencyFragment"
         android:name="com.brian.dmgnt.fragments.EmergencyFragment"

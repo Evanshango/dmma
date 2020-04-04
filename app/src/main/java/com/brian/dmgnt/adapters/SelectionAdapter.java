@@ -10,18 +10,18 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.brian.dmgnt.R;
-import com.brian.dmgnt.models.Selection;
+import com.brian.dmgnt.models.GeneralInfo;
 
 import java.util.List;
 
 public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.ItemHolder> {
 
-    private List<Selection> mSelections;
+    private List<GeneralInfo> mGeneralInfos;
     private SelectedItem mSelectedItem;
     private double height;
 
-    public SelectionAdapter(List<Selection> selections, SelectedItem selectedItem) {
-        mSelections = selections;
+    public SelectionAdapter(List<GeneralInfo> generalInfos, SelectedItem selectedItem) {
+        mGeneralInfos = generalInfos;
         mSelectedItem = selectedItem;
     }
 
@@ -36,12 +36,12 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.Item
 
     @Override
     public void onBindViewHolder(@NonNull ItemHolder holder, int position) {
-        holder.bind(mSelections.get(position));
+        holder.bind(mGeneralInfos.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return mSelections.size();
+        return mGeneralInfos.size();
     }
 
     class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -63,18 +63,18 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.Item
             itemView.setOnClickListener(this);
         }
 
-        void bind(Selection selection) {
-            selectionName.setText(selection.getSelection());
+        void bind(GeneralInfo generalInfo) {
+            selectionName.setText(generalInfo.getInfoType());
         }
 
         @Override
         public void onClick(View v) {
-            mSelectedItem.itemSelected(mSelections.get(getAdapterPosition()));
+            mSelectedItem.itemSelected(mGeneralInfos.get(getAdapterPosition()));
         }
     }
 
     public interface SelectedItem {
 
-        void itemSelected(Selection selection);
+        void itemSelected(GeneralInfo generalInfo);
     }
 }

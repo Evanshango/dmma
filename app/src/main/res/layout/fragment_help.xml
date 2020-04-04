@@ -91,15 +91,27 @@
                 android:padding="16dp"
                 android:hint="@string/enter_some_remarks"
                 android:background="@drawable/input_fields"/>
-            <Button
-                android:id="@+id/btnProceed"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_margin="16dp"
-                android:text="@string/proceed"
-                android:textAllCaps="true"
-                android:background="@drawable/button_layout_success"
-                android:textColor="@color/colorWhite"/>
+                android:layout_height="wrap_content">
+                <Button
+                    android:id="@+id/btnProceed"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_margin="16dp"
+                    android:text="@string/proceed"
+                    android:textAllCaps="true"
+                    android:background="@drawable/button_layout_success"
+                    android:textColor="@color/colorWhite"/>
+                <ProgressBar
+                    android:id="@+id/makingRequest"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:elevation="5dp"
+                    android:visibility="gone"
+                    android:theme="@style/AppTheme.WhiteAccent"/>
+            </RelativeLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

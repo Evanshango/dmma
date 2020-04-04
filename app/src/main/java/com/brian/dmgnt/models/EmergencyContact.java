@@ -2,16 +2,33 @@ package com.brian.dmgnt.models;
 
 public class EmergencyContact {
 
-    private String contactName, imageUrl, info, contactNo;
+    private String contactEmail, contactId, contactInfo, contactName, contactNo, imageUrl, regDate;
 
     public EmergencyContact() {
     }
 
-    public EmergencyContact(String contactName, String imageUrl, String info, String contactNo) {
-        this.contactName = contactName;
-        this.imageUrl = imageUrl;
-        this.info = info;
-        this.contactNo = contactNo;
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
+    }
+
+    public String getContactId() {
+        return contactId;
+    }
+
+    public void setContactId(String contactId) {
+        this.contactId = contactId;
+    }
+
+    public String getContactInfo() {
+        return contactInfo;
+    }
+
+    public void setContactInfo(String contactInfo) {
+        this.contactInfo = contactInfo;
     }
 
     public String getContactName() {
@@ -22,6 +39,14 @@ public class EmergencyContact {
         this.contactName = contactName;
     }
 
+    public String getContactNo() {
+        return contactNo;
+    }
+
+    public void setContactNo(String contactNo) {
+        this.contactNo = contactNo;
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }
@@ -30,19 +55,11 @@ public class EmergencyContact {
         this.imageUrl = imageUrl;
     }
 
-    public String getInfo() {
-        return info;
+    public String getRegDate() {
+        return regDate;
     }
 
-    public void setInfo(String info) {
-        this.info = info;
-    }
-
-    public String getContactNo() {
-        return contactNo;
-    }
-
-    public void setContactNo(String contactNo) {
-        this.contactNo = contactNo;
+    public void setRegDate(String regDate) {
+        this.regDate = regDate;
     }
 }

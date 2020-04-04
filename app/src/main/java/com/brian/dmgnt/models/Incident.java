@@ -6,20 +6,22 @@ public class Incident {
 
     private String incidentId, category, imageUrl, description, userId, date, time;
     private GeoPoint mGeoPoint;
+    private boolean resolved;
 
     public Incident() {
     }
 
     public Incident(String incidentId, String category, String imageUrl, String description,
-                    String userId, GeoPoint geoPoint, String date, String time) {
+                    String userId, String date, String time, GeoPoint geoPoint, boolean resolved) {
         this.incidentId = incidentId;
         this.category = category;
         this.imageUrl = imageUrl;
         this.description = description;
         this.userId = userId;
-        mGeoPoint = geoPoint;
         this.date = date;
         this.time = time;
+        mGeoPoint = geoPoint;
+        this.resolved = resolved;
     }
 
     public String getIncidentId() {
@@ -62,14 +64,6 @@ public class Incident {
         this.userId = userId;
     }
 
-    public GeoPoint getGeoPoint() {
-        return mGeoPoint;
-    }
-
-    public void setGeoPoint(GeoPoint geoPoint) {
-        mGeoPoint = geoPoint;
-    }
-
     public String getDate() {
         return date;
     }
@@ -84,5 +78,21 @@ public class Incident {
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    public GeoPoint getGeoPoint() {
+        return mGeoPoint;
+    }
+
+    public void setGeoPoint(GeoPoint geoPoint) {
+        mGeoPoint = geoPoint;
+    }
+
+    public boolean isResolved() {
+        return resolved;
+    }
+
+    public void setResolved(boolean resolved) {
+        this.resolved = resolved;
     }
 }

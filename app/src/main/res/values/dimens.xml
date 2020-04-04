@@ -3,4 +3,5 @@
     <dimen name="notificationText">12sp</dimen>
     <dimen name="custom_marker_image">50dp</dimen>
     <dimen name="custom_marker_padding">2dp</dimen>
+    <dimen name="small_text">10sp</dimen>
 </resources>

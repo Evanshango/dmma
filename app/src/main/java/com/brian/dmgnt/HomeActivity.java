@@ -10,6 +10,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.TextView;
@@ -26,6 +27,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
 import com.brian.dmgnt.helpers.UserClient;
+import com.brian.dmgnt.models.Notification;
 import com.brian.dmgnt.models.User;
 import com.brian.dmgnt.models.UserLocation;
 import com.brian.dmgnt.services.LocationService;
@@ -36,15 +38,24 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import static com.brian.dmgnt.helpers.Constants.CREATED_AT;
 import static com.brian.dmgnt.helpers.Constants.ERROR_DIALOG_REQUEST;
+import static com.brian.dmgnt.helpers.Constants.NOTIFICATIONS;
 import static com.brian.dmgnt.helpers.Constants.PERMISSION_REQUEST_ACCESS_FINE_LOCATION;
 import static com.brian.dmgnt.helpers.Constants.PERMISSION_REQUEST_ENABLE_GPS;
+import static com.brian.dmgnt.helpers.Constants.READ;
+import static com.brian.dmgnt.helpers.Constants.RECEIVER;
 import static com.brian.dmgnt.helpers.Constants.USERS_REF;
 import static com.brian.dmgnt.helpers.Constants.USER_LOCATION;
 
@@ -59,6 +70,7 @@ public class HomeActivity extends AppCompatActivity {
     private FusedLocationProviderClient mFusedLocationClient;
     private UserLocation mUserLocation;
     private FirebaseFirestore mDatabase;
+    private CollectionReference notsCollection;
     private String userId;
     private FirebaseUser mUser;
 
@@ -69,6 +81,7 @@ public class HomeActivity extends AppCompatActivity {
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         mDatabase = FirebaseFirestore.getInstance();
+        notsCollection = mDatabase.collection(NOTIFICATIONS);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         final BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
@@ -78,11 +91,43 @@ public class HomeActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(bottomNav, mNavController);
 
         mUser = auth.getCurrentUser();
-
+        userId = mUser != null ? mUser.getUid() : null;
         initViews();
 
-        btnToNotifications.setOnClickListener(v -> toNotifications());
+        getNotifications();
 
+//        btnToNotifications.setOnClickListener(v -> toNotifications());
+    }
+
+    private void getNotifications() {
+        Log.d(TAG, "getNotifications: userId: " + userId);
+        if (userId != null) {
+            Query query = notsCollection.document(userId).collection(NOTIFICATIONS)
+                    .whereEqualTo(RECEIVER, userId).whereEqualTo(READ, false)
+                    .orderBy(CREATED_AT, Query.Direction.DESCENDING);
+            query.get().addOnSuccessListener(queryDocumentSnapshots -> {
+                List<Notification> notifications = new ArrayList<>();
+                if (queryDocumentSnapshots != null) {
+                    for (QueryDocumentSnapshot snapshot : queryDocumentSnapshots) {
+                        Notification notification = snapshot.toObject(Notification.class);
+                        notifications.add(notification);
+                    }
+                    setNotificationCount(notifications);
+                } else {
+                    btnToNotifications.setText("0");
+                }
+            });
+        }
+    }
+
+    private void setNotificationCount(List<Notification> notifications) {
+        int totalNotifications = notifications.size();
+        btnToNotifications.setText(String.valueOf(totalNotifications));
+        btnToNotifications.setOnClickListener(v -> {
+            Intent intent = new Intent(this, NotificationActivity.class);
+            intent.putParcelableArrayListExtra("notifications", (ArrayList<Notification>) notifications);
+            startActivity(intent);
+        });
     }
 
     private void startLocationService() {
@@ -98,8 +143,8 @@ public class HomeActivity extends AppCompatActivity {
 
     private boolean isLocationServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo serviceInfo : manager.getRunningServices(Integer.MAX_VALUE)){
-            if ("com.brian.dmgnt.services.LocationService".equals(serviceInfo.service.getClassName())){
+        for (ActivityManager.RunningServiceInfo serviceInfo : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if ("com.brian.dmgnt.services.LocationService".equals(serviceInfo.service.getClassName())) {
                 Log.d(TAG, "isLocationServiceRunning: location service is already running");
                 return true;
             }
@@ -238,11 +283,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        btnToNotifications = findViewById(R.id.btnToNotifications);
-    }
-
-    private void toNotifications() {
-//        Toast.makeText(this, "To notifications", Toast.LENGTH_SHORT).show();
+        btnToNotifications = findViewById(R.id.txtNotifications);
     }
 
     @Override
@@ -287,7 +328,7 @@ public class HomeActivity extends AppCompatActivity {
         if (mUser == null) {
             toAuthActivity();
         } else {
-            userId = mUser.getUid();
+            Log.d(TAG, "onStart: Already logged in");
         }
     }
 

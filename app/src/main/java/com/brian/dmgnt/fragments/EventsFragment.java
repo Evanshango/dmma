@@ -1,6 +1,7 @@
 package com.brian.dmgnt.fragments;
 
 import android.animation.ObjectAnimator;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -17,17 +19,19 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.brian.dmgnt.InfoItemActivity;
 import com.brian.dmgnt.R;
 import com.brian.dmgnt.adapters.SelectionAdapter;
-import com.brian.dmgnt.helpers.ClusterRenderer;
 import com.brian.dmgnt.helpers.ViewWeightAnimationWrapper;
-import com.brian.dmgnt.models.ClusterMarker;
+import com.brian.dmgnt.models.GeneralInfo;
 import com.brian.dmgnt.models.Incident;
 import com.brian.dmgnt.models.PolyLineData;
-import com.brian.dmgnt.models.Selection;
 import com.brian.dmgnt.models.UserLocation;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -45,10 +49,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.PendingResult;
-import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.internal.PolylineEncoding;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
@@ -57,6 +61,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.brian.dmgnt.helpers.Constants.GENERAL_INFO;
 import static com.brian.dmgnt.helpers.Constants.INCIDENTS;
 import static com.brian.dmgnt.helpers.Constants.MAP_CONTRACTED;
 import static com.brian.dmgnt.helpers.Constants.MAP_EXPANDED;
@@ -70,14 +75,11 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
     private static final String TAG = "EventsFragment";
     private GoogleMap mGoogleMap;
     private MapView mMapView;
-    private CollectionReference incidentsCollection, locationsCollection;
+    private CollectionReference incidentsCollection, locationsCollection, infoCollection;
     private List<Incident> mIncidents = new ArrayList<>();
     private double bottomBoundary, topBoundary, leftBoundary, rightBoundary;
-    private ClusterManager mClusterManager;
-    private ClusterRenderer mClusterRenderer;
-    private ArrayList<ClusterMarker> mClusterMarkers = new ArrayList<>();
     private RecyclerView selectionRecycler;
-    private List<Selection> mSelectionList = new ArrayList<>();
+    private List<GeneralInfo> mGeneralInfos = new ArrayList<>();
     private ImageView btnFullScreenMap, btnResetMap;
     private int mMapLayoutState = 0;
     private RelativeLayout mMapContainer;
@@ -86,6 +88,8 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
     private ArrayList<PolyLineData> mPolyLineData = new ArrayList<>();
     private Marker mSelectedMarker = null;
     private ArrayList<Marker> mTripMarkers = new ArrayList<>();
+    private ProgressBar infoLoader;
+    private NavController mNavController;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -98,6 +102,7 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         locationsCollection = database.collection(USER_LOCATION);
         incidentsCollection = database.collection(INCIDENTS);
+        infoCollection = database.collection(GENERAL_INFO);
 
         initViews(view);
 
@@ -116,20 +121,28 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
     }
 
     private void populateSelections() {
+        infoLoader.setVisibility(View.VISIBLE);
 
-        SelectionAdapter selectionAdapter = new SelectionAdapter(mSelectionList, this);
+        infoCollection.get().addOnSuccessListener(queryDocumentSnapshots -> {
+            if (queryDocumentSnapshots != null){
+                for (QueryDocumentSnapshot snapshot : queryDocumentSnapshots){
+                    GeneralInfo generalInfo = snapshot.toObject(GeneralInfo.class);
+                    mGeneralInfos.add(generalInfo);
+                }
+                setUpLayout(mGeneralInfos);
+            }
+        });
+    }
 
-        mSelectionList.add(new Selection("001", "Educational Information"));
-        mSelectionList.add(new Selection("002", "Medical Service"));
-        mSelectionList.add(new Selection("003", "Disasters"));
-        mSelectionList.add(new Selection("004", "First Aid"));
+    private void setUpLayout(List<GeneralInfo> generalInfos) {
+        SelectionAdapter selectionAdapter = new SelectionAdapter(generalInfos, this);
 
         GridLayoutManager manager = new GridLayoutManager(getContext(), 2);
         selectionRecycler.setHasFixedSize(true);
         selectionRecycler.setLayoutManager(manager);
-
         selectionRecycler.setAdapter(selectionAdapter);
         selectionAdapter.notifyDataSetChanged();
+        infoLoader.setVisibility(View.GONE);
     }
 
     private void getUserLocation(String userId) {
@@ -142,6 +155,7 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mNavController = Navigation.findNavController(view);
         btnFullScreenMap.setOnClickListener(v -> animateMapView());
         btnResetMap.setOnClickListener(v -> getIncidents(mGoogleMap));
     }
@@ -207,34 +221,6 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
         }).addOnFailureListener(e -> Log.d(TAG, "getIncidents: An error occurred"));
     }
 
-//    private void addMapMarkers(List<Incident> incidents) {
-//        if (mGoogleMap != null) {
-//            if (mClusterManager == null) {
-//                mClusterManager = new ClusterManager<ClusterMarker>(getActivity()
-//                        .getApplicationContext(), mGoogleMap);
-//            }
-//            if (mClusterRenderer == null) {
-//                mClusterRenderer = new ClusterRenderer(getActivity(), mGoogleMap, mClusterManager);
-//                mClusterManager.setRenderer(mClusterRenderer);
-//            }
-//            for (Incident incident : incidents) {
-//                try {
-//                    ClusterMarker marker = new ClusterMarker(
-//                            new LatLng(incident.getGeoPoint().getLatitude(),
-//                                    incident.getGeoPoint().getLongitude()), incident.getCategory(),
-//                            incident.getDescription(), incident.getImageUrl(), incident
-//                    );
-//                    mClusterManager.addItem(marker);
-//                    mClusterMarkers.add(marker);
-//                } catch (NullPointerException e) {
-//                    Log.d(TAG, "addMapMarkers: NullPointerException: " + e.getMessage());
-//                }
-//            }
-//            mClusterManager.cluster();
-//            setCameraView();
-//        }
-//    }
-
     private void initGoogleMap(Bundle savedInstanceState) {
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
@@ -268,7 +254,8 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
                     newDecodedPath.add(new LatLng(latLng.lat, latLng.lng));
                 }
                 Polyline polyline = mGoogleMap.addPolyline(new PolylineOptions().addAll(newDecodedPath));
-                polyline.setColor(ContextCompat.getColor(getActivity(), R.color.darkGrey));
+                polyline.setColor(ContextCompat.getColor(
+                        Objects.requireNonNull(getActivity()), R.color.darkGrey));
                 polyline.setClickable(true);
                 mPolyLineData.add(new PolyLineData(polyline, route.legs[0]));
 
@@ -342,6 +329,7 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
         btnFullScreenMap = view.findViewById(R.id.btnFullScreenMap);
         mMapContainer = view.findViewById(R.id.mapContainer);
         btnResetMap = view.findViewById(R.id.btnResetMap);
+        infoLoader = view.findViewById(R.id.infoLoader);
     }
 
     @Override
@@ -380,8 +368,6 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
             );
             googleMap.addMarker(new MarkerOptions().position(latLng).title(incident.getCategory())
                     .snippet(incident.getDescription()));
-//            googleMap.animateCamera(CameraUpdateFactory.zoomTo(18f));
-//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10f));
         }
         setCameraView();
     }
@@ -389,14 +375,17 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
+        mGoogleMap.setMyLocationEnabled(true);
         getIncidents(mGoogleMap);
         mGoogleMap.setOnPolylineClickListener(this);
         mGoogleMap.setOnInfoWindowClickListener(this);
     }
 
     @Override
-    public void itemSelected(Selection selection) {
-        Toast.makeText(getContext(), selection.getSelection() + " clicked", Toast.LENGTH_SHORT).show();
+    public void itemSelected(GeneralInfo generalInfo) {
+        Intent intent = new Intent(getContext(), InfoItemActivity.class);
+        intent.putExtra("infoItem", generalInfo);
+        startActivity(intent);
     }
 
     @Override
@@ -448,7 +437,8 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
             index++;
             Log.d(TAG, "onPolylineClick: " + polyLineData.toString());
             if (polyline.getId().equals(polyLineData.getPolyline().getId())) {
-                polyLineData.getPolyline().setColor(ContextCompat.getColor(getActivity(), R.color.blueOne));
+                polyLineData.getPolyline().setColor(ContextCompat.getColor(
+                        Objects.requireNonNull(getActivity()), R.color.blueOne));
                 polyLineData.getPolyline().setZIndex(1);
 
                 LatLng endLocation = new LatLng(polyLineData.getDirectionsLeg().endLocation.lat,
@@ -461,7 +451,8 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
                 marker.showInfoWindow();
                 mTripMarkers.add(marker);
             } else {
-                polyLineData.getPolyline().setColor(ContextCompat.getColor(getActivity(), R.color.darkGrey));
+                polyLineData.getPolyline().setColor(ContextCompat.getColor(
+                        Objects.requireNonNull(getActivity()), R.color.darkGrey));
                 polyLineData.getPolyline().setZIndex(0);
             }
         }

@@ -42,15 +42,15 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Cont
 
     @Override
     public int getItemCount() {
-        return mEmergencyContacts.size();
+        return mEmergencyContacts != null ? mEmergencyContacts.size() : 0;
     }
 
     class ContactHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         ContactClick mContactClick;
         CircleImageView contactImage;
-        TextView contactName, displayInitial;
-        RelativeLayout moreOptions;
+        TextView contactName, displayInitial, optionInfo, optionCall;
+        RelativeLayout moreOptions, infoLayout;
 
         ContactHolder(@NonNull View itemView, ContactClick contactClick) {
             super(itemView);
@@ -58,36 +58,34 @@ public class EmergencyAdapter extends RecyclerView.Adapter<EmergencyAdapter.Cont
             contactImage = itemView.findViewById(R.id.contactImage);
             contactName = itemView.findViewById(R.id.contactName);
             moreOptions = itemView.findViewById(R.id.moreOptions);
+            optionInfo = itemView.findViewById(R.id.optionInfo);
+            optionCall = itemView.findViewById(R.id.optionCall);
+            infoLayout = itemView.findViewById(R.id.infoLayout);
             displayInitial = itemView.findViewById(R.id.initial);
-            itemView.setOnClickListener(this);
+
+            infoLayout.setOnClickListener(this);
+            optionInfo.setOnClickListener(this);
+            optionCall.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
             mContactClick.contactClicked(
-                    mEmergencyContacts.get(getAdapterPosition()), v, moreOptions
-            );
+                    mEmergencyContacts.get(getAdapterPosition()), v, moreOptions);
         }
 
         void bind(EmergencyContact emergencyContact) {
             String name = emergencyContact.getContactName();
             String imageUrl = emergencyContact.getImageUrl();
             contactName.setText(name);
-            char initial = Character.toUpperCase(name.charAt(0));
-            if ( imageUrl != null){
-                displayInitial.setVisibility(View.GONE);
-                contactImage.setVisibility(View.VISIBLE);
-                Glide.with(itemView.getContext()).load(imageUrl).into(contactImage);
-            } else {
-                displayInitial.setVisibility(View.VISIBLE);
-                contactImage.setVisibility(View.GONE);
-                displayInitial.setText(initial);
-            }
+            Glide.with(itemView.getContext()).load(imageUrl).into(contactImage);
+
         }
     }
 
     public interface ContactClick {
 
-        void contactClicked(EmergencyContact emergencyContact, View view, RelativeLayout moreOptions);
+        void contactClicked(
+                EmergencyContact emergencyContact, View view, RelativeLayout moreOptions);
     }
 }

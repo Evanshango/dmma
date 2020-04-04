@@ -13,4 +13,6 @@
     <color name="helpBackground">#787878</color>
     <color name="darkGrey">#737373 </color>
     <color name="blueOne">#66a3ff</color>
+    <color name="grey">#bfbfbf</color>
+    <color name="white">#fff</color>
 </resources>

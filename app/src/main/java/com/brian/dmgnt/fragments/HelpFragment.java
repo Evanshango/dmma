@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.MimeTypeMap;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,6 +27,8 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.brian.dmgnt.R;
+import com.brian.dmgnt.models.Disaster;
+import com.brian.dmgnt.models.GeneralInfo;
 import com.brian.dmgnt.models.Incident;
 import com.brian.dmgnt.models.UserLocation;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,17 +42,24 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
+import static com.brian.dmgnt.helpers.Constants.DISASTERS;
 import static com.brian.dmgnt.helpers.Constants.GALLERY_REQUEST_CODE;
+import static com.brian.dmgnt.helpers.Constants.GENERAL_INFO;
 import static com.brian.dmgnt.helpers.Constants.INCIDENTS;
+import static com.brian.dmgnt.helpers.Constants.INFO_TYPE;
 import static com.brian.dmgnt.helpers.Constants.LONG_DATE;
 import static com.brian.dmgnt.helpers.Constants.MAP_VIEW_BUNDLE_KEY;
 import static com.brian.dmgnt.helpers.Constants.SHORT_DATE;
@@ -64,14 +74,15 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
     private EditText helpRemarks;
     private AutoCompleteTextView category;
     private Button btnProceed;
-    private CollectionReference incidentCollection;
+    private CollectionReference incidentCollection, locationsCollection, generalInfoRef;
     private String incidentId, date, time, imageUrl, userId;
     private GeoPoint mGeoPoint;
     private NavController mNavController;
     private StorageReference mStorageReference;
     private GoogleMap mGoogleMap;
     private MapView userMapLocation;
-    private CollectionReference locationsCollection;
+    private List<String> disasterNames = new ArrayList<>();
+    private ProgressBar makingRequest;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -85,6 +96,7 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
 
         incidentCollection = database.collection(INCIDENTS);
         locationsCollection = database.collection(USER_LOCATION);
+        generalInfoRef = database.collection(GENERAL_INFO);
         incidentId = incidentCollection.document().getId();
 
         time = new SimpleDateFormat(LONG_DATE, Locale.getDefault()).format(new Date());
@@ -93,14 +105,45 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
         initViews(view);
         initGoogleMap(savedInstanceState);
 
-        if (user != null) {
-            userId = user.getUid();
-            getUserLocation(userId);
-        } else {
-            Log.d(TAG, "onCreateView: User not logged in");
-        }
-
+        userId = user != null ? user.getUid() : "";
+        getUserLocation(userId);
+        fetchDisasters();
         return view;
+    }
+
+    private void fetchDisasters() {
+        Query query = generalInfoRef.whereEqualTo(INFO_TYPE, "Disasters").limit(1);
+        query.get().addOnSuccessListener(queryDocumentSnapshots -> {
+            for (QueryDocumentSnapshot snapshot : queryDocumentSnapshots) {
+                GeneralInfo generalInfo = snapshot.toObject(GeneralInfo.class);
+                String infoId = generalInfo.getInfoId();
+                loadDisasterItems(infoId);
+            }
+        });
+    }
+
+    private void loadDisasterItems(String infoId) {
+        List<Disaster> disasters = new ArrayList<>();
+        generalInfoRef.document(infoId).collection(DISASTERS).get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (QueryDocumentSnapshot snapshot : queryDocumentSnapshots) {
+                        Disaster disaster = snapshot.toObject(Disaster.class);
+                        disasters.add(disaster);
+                    }
+                    fillCategorySpinner(disasters);
+                }).addOnFailureListener(e -> Log.d(TAG, "loadDisasterItems: Error " + e));
+    }
+
+    private void fillCategorySpinner(List<Disaster> disasters) {
+        if (disasters != null) {
+            for (Disaster disaster : disasters) {
+                String disasterName = disaster.getName();
+                disasterNames.add(disasterName);
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getContext()),
+                    android.R.layout.simple_spinner_dropdown_item, disasterNames);
+            category.setAdapter(adapter);
+        }
     }
 
     private void initGoogleMap(Bundle savedInstanceState) {
@@ -118,6 +161,7 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
         helpRemarks = view.findViewById(R.id.helpRemarks);
         category = view.findViewById(R.id.chooseCategory);
         btnProceed = view.findViewById(R.id.btnProceed);
+        makingRequest = view.findViewById(R.id.makingRequest);
     }
 
     @Override
@@ -125,47 +169,57 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState);
         mNavController = Navigation.findNavController(view);
         mImageView.setOnClickListener(v -> openGallery());
-
         btnProceed.setOnClickListener(v -> sendHelpRequest());
     }
 
     private void sendHelpRequest() {
-        String selectedCategory = category.getText().toString();
+        String selectedCategory = category.getText().toString().trim();
         String remarks = helpRemarks.getText().toString().trim();
         if (mGeoPoint != null) {
             if (!selectedCategory.isEmpty()) {
-                if (imageUri != null) {
-                    if (!remarks.isEmpty()) {
-                        doMakeRequest(selectedCategory, remarks);
+                if (disasterNames.contains(selectedCategory)) {
+                    if (imageUri != null) {
+                        if (!remarks.isEmpty()) {
+                            btnProceed.setEnabled(false);
+                            doMakeRequest(selectedCategory, remarks);
+                        } else {
+                            helpRemarks.setError("Description required");
+                            helpRemarks.requestFocus();
+                        }
                     } else {
-                        helpRemarks.setError("Description required");
-                        helpRemarks.requestFocus();
+                        Toast.makeText(getContext(), "Choose an image", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(getContext(), "Please select an image", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Invalid disaster name", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Toast.makeText(getContext(), "Please choose a category", Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(getContext(), "Please check your location settings", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Check your location settings", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void doMakeRequest(String selectedCategory, String remarks) {
-        Incident incident = new Incident(
-                incidentId, selectedCategory, imageUrl, remarks, userId, mGeoPoint, date, time
-        );
+        makingRequest.setVisibility(View.VISIBLE);
+        Incident incident = new Incident(incidentId, selectedCategory, imageUrl, remarks, userId,
+                date, time, mGeoPoint, false);
         incidentCollection.document(incidentId).set(incident).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
+                makingRequest.setVisibility(View.GONE);
+                btnProceed.setEnabled(true);
                 mNavController.navigate(R.id.action_helpFragment_to_eventsFragment);
             } else {
+                makingRequest.setVisibility(View.GONE);
+                btnProceed.setEnabled(true);
                 Toast.makeText(getContext(), "Please try again", Toast.LENGTH_SHORT).show();
             }
-        }).addOnFailureListener(e -> Toast.makeText(getContext(), "An error occurred",
-                Toast.LENGTH_SHORT).show());
+        }).addOnFailureListener(e -> {
+            makingRequest.setVisibility(View.GONE);
+            btnProceed.setEnabled(true);
+            Toast.makeText(getContext(), "An error occurred", Toast.LENGTH_SHORT).show() ;
+        });
     }
-
 
     private void openGallery() {
         Intent intent = new Intent();
@@ -200,7 +254,7 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
         TextView proceed = dialog.findViewById(R.id.proceed);
         ProgressBar uploadProgress = dialog.findViewById(R.id.uploadProgress);
 
-        proceed.setOnClickListener(v -> uploadImage(dialog, uploadProgress));
+        proceed.setOnClickListener(v -> uploadImage(dialog, uploadProgress, cancel));
         cancel.setOnClickListener(v -> {
             imageUri = null;
             mImageView.setImageURI(null);
@@ -208,7 +262,8 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    private void uploadImage(Dialog dialog, ProgressBar progressBar) {
+    private void uploadImage(Dialog dialog, ProgressBar progressBar, TextView cancel) {
+        cancel.setEnabled(false);
         progressBar.setVisibility(View.VISIBLE);
         if (imageUri != null) {
             StorageReference fileRef = mStorageReference.child(incidentId)
