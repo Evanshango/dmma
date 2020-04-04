@@ -10,7 +10,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.TextView;
@@ -318,6 +317,7 @@ public class HomeActivity extends AppCompatActivity {
                 getLocationPermission();
             }
         }
+        getNotifications();
     }
 
     @Override
@@ -326,8 +326,27 @@ public class HomeActivity extends AppCompatActivity {
         if (mUser == null) {
             toAuthActivity();
         } else {
-            Log.d(TAG, "onStart: Already logged in");
+            String uid = mUser.getUid();
+            listenForNotificationsChanges(uid);
         }
+    }
+
+    private void listenForNotificationsChanges(String uid) {
+        notsCollection.document(uid).collection(NOTIFICATIONS)
+                .addSnapshotListener(this, (queryDocumentSnapshots, e) -> {
+                   if (e != null){
+                       Toast.makeText(this, "Error loading notifications", Toast.LENGTH_SHORT).show();
+                       return;
+                   }
+                    List<Notification> notifications = new ArrayList<>();
+                   if (queryDocumentSnapshots != null){
+                       for (QueryDocumentSnapshot snapshot : queryDocumentSnapshots) {
+                           Notification notification = snapshot.toObject(Notification.class);
+                           notifications.add(notification);
+                       }
+                       setNotificationCount(notifications);
+                   }
+                });
     }
 
     private void toAuthActivity() {
