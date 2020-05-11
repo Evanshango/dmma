@@ -6,23 +6,15 @@
     tools:context=".fragments.RegisterFragment"
     android:orientation="vertical">
 
-    <LinearLayout
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
-        <ImageView
-            android:id="@+id/btnRegBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_arrow_back"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/register"
-            android:gravity="center"
-            android:textColor="@color/colorAccent"
-            android:textSize="18sp"/>
-    </LinearLayout>
+        android:text="@string/register"
+        android:gravity="center"
+        android:padding="16dp"
+        android:textAllCaps="true"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp"/>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -34,10 +26,11 @@
             <ImageView
                 android:id="@+id/logo"
                 android:layout_width="150dp"
-                android:layout_height="120dp"
+                android:layout_height="100dp"
                 android:src="@drawable/logo"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="10dp"/>
+                android:layout_marginTop="10dp"
+                android:scaleType="centerCrop"/>
 
             <TextView
                 android:id="@+id/label"
@@ -106,19 +99,32 @@
                     android:singleLine="true"
                     android:background="@drawable/input_fields"
                     android:padding="10dp"/>
-                <Button
-                    android:id="@+id/btnReg"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:text="@string/register"
-                    android:layout_margin="16dp"
-                    android:textColor="@color/colorWhite"
-                    android:background="@drawable/button_layout"/>
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="10dp">
+                    <Button
+                        android:id="@+id/btnReg"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:text="@string/register"
+                        android:textColor="@color/colorWhite"
+                        android:background="@drawable/button_layout"/>
+                    <ProgressBar
+                        android:id="@+id/regProgress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:elevation="5dp"
+                        android:visibility="gone"
+                        android:layout_centerInParent="true"/>
+                </RelativeLayout>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
+                android:padding="8dp"
                 android:gravity="center"
                 android:layout_below="@id/layoutDetails">
                 <TextView

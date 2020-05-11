@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,7 +38,8 @@ public class RegisterFragment extends Fragment {
     private EditText regUsername, regEmail, regPassword, regCPassword;
     private Button btnReg;
     private FirebaseAuth mAuth;
-    private CollectionReference usersCollection;
+    private CollectionReference usersRef;
+    private ProgressBar regProgress;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -62,7 +64,7 @@ public class RegisterFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         FirebaseFirestore database = FirebaseFirestore.getInstance();
-        usersCollection = database.collection(USERS_REF);
+        usersRef = database.collection(USERS_REF);
     }
 
     private void registerUser() {
@@ -71,7 +73,7 @@ public class RegisterFragment extends Fragment {
         String password = regPassword.getText().toString().trim();
         String cPass = regCPassword.getText().toString().trim();
 
-        if (!username.isEmpty()){
+        if (!username.isEmpty()) {
             if (!email.isEmpty() || Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 if (!password.isEmpty()) {
                     if (password.equals(cPass)) {
@@ -98,31 +100,40 @@ public class RegisterFragment extends Fragment {
     }
 
     private void doRegister(String username, String email, String password) {
+        regProgress.setVisibility(View.VISIBLE);
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
+            if (task.isSuccessful()) {
                 saveUserInfo(username, email);
             } else {
+                regProgress.setVisibility(View.GONE);
                 String error = Objects.requireNonNull(task.getException()).getMessage();
                 Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
             }
-        }).addOnFailureListener(e -> Toast.makeText(getContext(), e.getMessage(),
-                Toast.LENGTH_SHORT).show());
+        }).addOnFailureListener(e -> {
+            regProgress.setVisibility(View.GONE);
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void saveUserInfo(String username, String email) {
         FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null){
+        if (user != null) {
             String userId = user.getUid();
             User mUser = new User(userId, username, email);
-            usersCollection.document(userId).set(mUser).addOnCompleteListener(task -> {
-                if (task.isSuccessful()){
+            usersRef.document(userId).set(mUser).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    regProgress.setVisibility(View.GONE);
                     navigateToHome();
                 } else {
+                    regProgress.setVisibility(View.GONE);
                     Toast.makeText(getContext(), "Error saving user info", Toast.LENGTH_SHORT).show();
                 }
-            }).addOnFailureListener(e -> Toast.makeText(getContext(), "Please try again later",
-                    Toast.LENGTH_SHORT).show());
+            }).addOnFailureListener(e -> {
+                regProgress.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Please try again later", Toast.LENGTH_SHORT).show();
+            });
         } else {
+            regProgress.setVisibility(View.GONE);
             Log.d(TAG, "saveUserInfo: User not created");
         }
     }
@@ -144,5 +155,6 @@ public class RegisterFragment extends Fragment {
         regPassword = view.findViewById(R.id.regPassword);
         regCPassword = view.findViewById(R.id.confirmPassword);
         btnReg = view.findViewById(R.id.btnReg);
+        regProgress = view.findViewById(R.id.regProgress);
     }
 }

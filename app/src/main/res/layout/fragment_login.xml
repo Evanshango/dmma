@@ -6,23 +6,15 @@
     android:orientation="vertical"
     tools:context=".fragments.LoginFragment">
 
-    <LinearLayout
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
-        <ImageView
-            android:id="@+id/btnLoginBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_arrow_back"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/log_in"
-            android:gravity="center"
-            android:textColor="@color/colorAccent"
-            android:textSize="18sp"/>
-    </LinearLayout>
+        android:text="@string/log_in"
+        android:gravity="center"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp"
+        android:textAllCaps="true"
+        android:padding="16dp"/>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -34,10 +26,11 @@
             <ImageView
                 android:id="@+id/logo"
                 android:layout_width="150dp"
-                android:layout_height="120dp"
+                android:layout_height="100dp"
                 android:src="@drawable/logo"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="10dp"/>
+                android:layout_marginTop="10dp"
+                android:scaleType="centerCrop"/>
 
             <TextView
                 android:id="@+id/label"
@@ -90,21 +83,35 @@
                     android:layout_gravity="end"
                     android:padding="8dp"
                     android:textColor="@color/colorAccent"/>
-                <Button
-                    android:id="@+id/btnLogin"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:text="@string/log_in"
-                    android:layout_margin="16dp"
-                    android:textColor="@color/colorWhite"
-                    android:background="@drawable/button_layout"/>
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="8dp">
+                    <Button
+                        android:id="@+id/btnLogin"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:text="@string/log_in"
+                        android:textAllCaps="true"
+                        android:textColor="@color/colorWhite"
+                        android:background="@drawable/button_layout"/>
+                    <ProgressBar
+                        android:id="@+id/loginProgress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:elevation="5dp"
+                        android:visibility="gone"
+                        android:layout_centerInParent="true"/>
+                </RelativeLayout>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_below="@id/layoutDetails"
-                android:padding="16dp">
+                android:padding="8dp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

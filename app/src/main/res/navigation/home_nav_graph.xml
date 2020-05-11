@@ -7,8 +7,7 @@
     <fragment
         android:id="@+id/eventsFragment"
         android:name="com.brian.dmgnt.fragments.EventsFragment"
-        android:label="fragment_events"
-        tools:layout="@layout/fragment_events" >
+        tools:layout="@layout/fragment_events">
         <argument
             android:name="infoId"
             app:argType="string" />
@@ -16,15 +15,17 @@
     <fragment
         android:id="@+id/emergencyFragment"
         android:name="com.brian.dmgnt.fragments.EmergencyFragment"
-        android:label="fragment_emergency"
         tools:layout="@layout/fragment_emergency" />
     <fragment
         android:id="@+id/helpFragment"
         android:name="com.brian.dmgnt.fragments.HelpFragment"
-        android:label="fragment_help"
-        tools:layout="@layout/fragment_help" >
+        tools:layout="@layout/fragment_help">
         <action
             android:id="@+id/action_helpFragment_to_eventsFragment"
             app:destination="@id/eventsFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/infoFragment"
+        android:name="com.brian.dmgnt.fragments.InfoFragment"
+        tools:layout="@layout/fragment_info" />
 </navigation>

@@ -15,4 +15,8 @@
         android:icon="@drawable/ic_help"
         android:menuCategory="system"
         android:title="@string/help" />
+    <item android:id="@+id/infoFragment"
+        android:icon="@drawable/ic_info_outline"
+        android:menuCategory="system"
+        android:title="@string/info"/>
 </menu>
