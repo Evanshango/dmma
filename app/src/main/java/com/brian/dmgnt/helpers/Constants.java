@@ -2,6 +2,7 @@ package com.brian.dmgnt.helpers;
 
 public class Constants {
 
+    public static final String API_KEY = "AIzaSyBkz98SjWjhKARrA09wjVAdHriLpk0w6dQ";
     public static final int ERROR_DIALOG_REQUEST = 1001;
     public static final int PERMISSION_REQUEST_ENABLE_GPS = 1002;
     public static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 1003;

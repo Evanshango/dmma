@@ -120,8 +120,6 @@ public class CountryStatsActivity extends AppCompatActivity {
                 return "";
             }
         });
-
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         mBarChart.invalidate();
     }
 

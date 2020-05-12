@@ -52,6 +52,7 @@ public class EmergencyFragment extends Fragment implements EmergencyAdapter.Cont
     }
 
     private void fetchContacts() {
+        mEmergencyContacts.clear();
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
         emergencyContactRv.setHasFixedSize(true);
         emergencyContactRv.setLayoutManager(manager);

@@ -1,10 +1,12 @@
 package com.brian.dmgnt;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -182,7 +184,7 @@ public class InfoItemActivity extends AppCompatActivity implements DisasterAdapt
     @Override
     public void disasterItemClicked(Disaster disaster) {
         String msg = " is part of " + disaster.getCategory() + " disasters";
-        showInfoDialog(null, msg);
+        showInfoDialog(disaster.getName(), msg);
     }
 
     @Override
@@ -213,14 +215,26 @@ public class InfoItemActivity extends AppCompatActivity implements DisasterAdapt
     }
 
     private void showInfoDialog(String title, String extraInfo) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        TextView resultMessage = new TextView(this);
-        resultMessage.setTextSize(16);
-        resultMessage.setText(extraInfo);
-        resultMessage.setGravity(Gravity.CENTER);
-        builder.setTitle(title)
-                .setView(resultMessage)
-                .setPositiveButton("Ok", ((dialog, which) -> dialog.dismiss()));
-        builder.show();
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.custom_dialog);
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+        }
+        initDialogViews(dialog, title, extraInfo);
+        dialog.show();
+    }
+
+    private void initDialogViews(Dialog dialog, String title, String extraInfo) {
+        TextView infoTitle = dialog.findViewById(R.id.infoTitle);
+        TextView infoDesc = dialog.findViewById(R.id.infoDesc);
+        TextView txtInfoOk = dialog.findViewById(R.id.txtInfoOk);
+
+        infoTitle.setText(title);
+        infoDesc.setText(extraInfo);
+        txtInfoOk.setOnClickListener(v -> dialog.dismiss());
     }
 }

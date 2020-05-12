@@ -46,6 +46,7 @@ import com.google.maps.model.DirectionsRoute;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.brian.dmgnt.helpers.Constants.API_KEY;
 import static com.brian.dmgnt.helpers.Constants.INCIDENTS;
 import static com.brian.dmgnt.helpers.Constants.MAP_VIEW_BUNDLE_KEY;
 import static com.brian.dmgnt.helpers.Constants.USER_LOCATION;
@@ -61,7 +62,7 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
     private List<Incident> mIncidents = new ArrayList<>();
     private double bottomBoundary, topBoundary, leftBoundary, rightBoundary;
     private ImageView btnResetMap;
-    private GeoApiContext mGeoApiContext = null;
+    private GeoApiContext mGeoApiContext;
     private GeoPoint mGeoPoint;
     private ArrayList<PolyLineData> mPolyLineData = new ArrayList<>();
     private Marker mSelectedMarker = null;
@@ -81,8 +82,6 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
         incidentsCollection = database.collection(INCIDENTS);
 
         initViews(view);
-
-        initGoogleMap(savedInstanceState);
 
         if (user != null) {
             String userId = user.getUid();
@@ -106,6 +105,12 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         btnResetMap.setOnClickListener(v -> getIncidents(mGoogleMap));
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        initGoogleMap(savedInstanceState);
     }
 
     private void setMapBounds(UserLocation userLocation) {
@@ -140,9 +145,7 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
         mMapView.getMapAsync(this);
 
         if (mGeoApiContext == null) {
-            mGeoApiContext = new GeoApiContext.Builder().apiKey(
-                    getString(R.string.API_KEY)
-            ).build();
+            mGeoApiContext = new GeoApiContext.Builder().apiKey(API_KEY).build();
         }
     }
 
@@ -215,7 +218,7 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
         }
         try {
             mMapView.onSaveInstanceState(mapViewBundle);
-        } catch (NullPointerException ex){
+        } catch (NullPointerException ex) {
             Log.d(TAG, "onSaveInstanceState: " + ex);
         }
     }
@@ -263,9 +266,9 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
     }
 
     private void resetMap() {
-        if (mGoogleMap != null){
+        if (mGoogleMap != null) {
             mGoogleMap.clear();
-            if (mPolyLineData.size() > 0){
+            if (mPolyLineData.size() > 0) {
                 mPolyLineData.clear();
                 mPolyLineData = new ArrayList<>();
             }
@@ -324,10 +327,10 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
         }
     }
 
-    private void zoomRoute(List<LatLng> latLngList){
+    private void zoomRoute(List<LatLng> latLngList) {
         if (mGoogleMap == null || latLngList == null || latLngList.isEmpty()) return;
         LatLngBounds.Builder boundBuilder = new LatLngBounds.Builder();
-        for (LatLng latLng : latLngList){
+        for (LatLng latLng : latLngList) {
             boundBuilder.include(latLng);
         }
         int routePadding = 120;

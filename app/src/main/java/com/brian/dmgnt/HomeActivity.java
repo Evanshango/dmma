@@ -139,6 +139,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private boolean isLocationServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        assert manager != null;
         for (ActivityManager.RunningServiceInfo serviceInfo : manager.getRunningServices(Integer.MAX_VALUE)) {
             if ("com.brian.dmgnt.services.LocationService".equals(serviceInfo.service.getClassName())) {
                 Log.d(TAG, "isLocationServiceRunning: location service is already running");
@@ -157,6 +158,7 @@ public class HomeActivity extends AppCompatActivity {
                 if (documentSnapshot.exists()) {
                     User user = documentSnapshot.toObject(User.class);
                     mUserLocation.setUser(user);
+                    assert user != null;
                     userName = user.getUsername();
                     ((UserClient) getApplicationContext()).setUser(user);
                     getLastKnownLocation();

@@ -19,9 +19,11 @@
             android:id="@+id/selectionName"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="16dp"
+            android:layout_margin="14dp"
             android:fontFamily="monospace"
             android:gravity="center"
+            android:textAllCaps="true"
+            android:textColor="@android:color/black"
             android:text="@string/sample_text"
             android:textAlignment="center" />
     </androidx.cardview.widget.CardView>
