@@ -102,7 +102,7 @@ public class EmergencyFragment extends Fragment implements EmergencyAdapter.Cont
     private void makeCall(EmergencyContact contact) {
         if (!contact.getContactNo().equals("")) {
             String phoneNo = "+" + contact.getContactNo();
-            AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getContext()));
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setMessage("Your are about to make a phone call to: "
                     + phoneNo).setPositiveButton("Proceed", ((dialog, which) -> {
                 Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", phoneNo, null));
@@ -116,7 +116,7 @@ public class EmergencyFragment extends Fragment implements EmergencyAdapter.Cont
     }
 
     private void displayInfo(EmergencyContact contact) {
-        Dialog dialog = new Dialog(Objects.requireNonNull(getContext()));
+        Dialog dialog = new Dialog(requireContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.custom_alert_info);
         Objects.requireNonNull(dialog.getWindow()).setLayout(ViewGroup.LayoutParams.MATCH_PARENT,

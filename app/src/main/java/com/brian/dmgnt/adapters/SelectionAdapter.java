@@ -17,12 +17,10 @@ import java.util.List;
 public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.ItemHolder> {
 
     private List<GeneralInfo> mGeneralInfos;
-    private SelectedItem mSelectedItem;
-    private double height;
+    private ItemInteraction mItemInteraction;
 
-    public SelectionAdapter(List<GeneralInfo> generalInfos, SelectedItem selectedItem) {
-        mGeneralInfos = generalInfos;
-        mSelectedItem = selectedItem;
+    public SelectionAdapter(ItemInteraction itemInteraction) {
+        mItemInteraction = itemInteraction;
     }
 
     @NonNull
@@ -30,8 +28,7 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.Item
     public ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.selection_item, parent, false);
-        height = parent.getMeasuredHeight() * 0.5;
-        return new ItemHolder(view, mSelectedItem);
+        return new ItemHolder(view, mItemInteraction);
     }
 
     @Override
@@ -44,21 +41,22 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.Item
         return mGeneralInfos.size();
     }
 
+    public void setData(List<GeneralInfo> generalInfoList){
+        mGeneralInfos = generalInfoList;
+        notifyDataSetChanged();
+    }
+
     class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         TextView selectionName;
-        SelectedItem mSelectedItem;
+        ItemInteraction mItemInteraction;
         CardView selectionCard;
 
-        ItemHolder(@NonNull View itemView, SelectedItem selectedItem) {
+        ItemHolder(@NonNull View itemView, ItemInteraction itemInteraction) {
             super(itemView);
-            double finalHeight = height * 0.75;
-            mSelectedItem = selectedItem;
+            mItemInteraction = itemInteraction;
             selectionName = itemView.findViewById(R.id.selectionName);
             selectionCard = itemView.findViewById(R.id.selectionCard);
-
-            selectionCard.setMinimumHeight((int) finalHeight);
-            selectionName.setMinHeight((int) finalHeight);
 
             itemView.setOnClickListener(this);
         }
@@ -69,11 +67,11 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.Item
 
         @Override
         public void onClick(View v) {
-            mSelectedItem.itemSelected(mGeneralInfos.get(getAdapterPosition()));
+            mItemInteraction.itemSelected(mGeneralInfos.get(getAdapterPosition()));
         }
     }
 
-    public interface SelectedItem {
+    public interface ItemInteraction {
 
         void itemSelected(GeneralInfo generalInfo);
     }

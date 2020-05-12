@@ -1,6 +1,6 @@
 <resources>
     <string name="API_KEY">AIzaSyDjHtC-8ynLlvAwbpqkb-vB7KAygzGRDmI</string>
-    <string name="app_name">DMgt</string>
+    <string name="app_name">Disaster Management</string>
     <string name="forgot_password">Forgot Password?</string>
     <string name="log_in">Log In</string>
     <string name="register">Register</string>
@@ -43,4 +43,8 @@
     <string name="close">Close</string>
     <string name="incident_msg">You reported an incident</string>
     <string name="_ok">OK</string>
+    <string name="infected">Infected</string>
+    <string name="recovered">Recovered</string>
+    <string name="deaths">Deaths</string>
+    <string name="global_numbers">Global Numbers</string>
 </resources>

@@ -52,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
 import static com.brian.dmgnt.helpers.Constants.DISASTERS;
@@ -140,7 +139,7 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
                 String disasterName = disaster.getName();
                 disasterNames.add(disasterName);
             }
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(Objects.requireNonNull(getContext()),
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
                     android.R.layout.simple_spinner_dropdown_item, disasterNames);
             category.setAdapter(adapter);
         }
@@ -242,7 +241,7 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void openConfirmDialog() {
-        Dialog dialog = new Dialog(Objects.requireNonNull(getContext()));
+        Dialog dialog = new Dialog(requireContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.custom_alert);
         iniDialogViews(dialog);
@@ -297,7 +296,7 @@ public class HelpFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private String getFileExtension(Uri imageUri) {
-        ContentResolver contentResolver = Objects.requireNonNull(getContext()).getContentResolver();
+        ContentResolver contentResolver = requireContext().getContentResolver();
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
         return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(imageUri));
     }

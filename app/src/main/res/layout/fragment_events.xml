@@ -6,50 +6,21 @@
     android:weightSum="100"
     tools:context=".fragments.EventsFragment">
 
-    <LinearLayout
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:weightSum="100"
-        android:orientation="vertical">
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/selectionRecycler"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="60"
-            tools:listitem="@layout/selection_item" />
+        android:layout_height="match_parent"/>
 
-        <RelativeLayout
-            android:id="@+id/mapContainer"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="40">
-            <com.google.android.gms.maps.MapView
-                android:id="@+id/map"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-
-            <ImageView
-                android:id="@+id/btnFullScreenMap"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@color/colorWhite"
-                android:src="@drawable/ic_fullscreen"
-                android:layout_alignParentEnd="true"
-                android:layout_margin="14dp"/>
-
-            <ImageView
-                android:id="@+id/btnResetMap"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@color/colorWhite"
-                android:src="@drawable/ic_refresh"
-                android:layout_margin="10dp"/>
-
-        </RelativeLayout>
-    </LinearLayout>
+    <ImageView
+        android:id="@+id/btnResetMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorWhite"
+        android:src="@drawable/ic_refresh"
+        android:layout_margin="10dp"/>
 
     <ProgressBar
-        android:id="@+id/infoLoader"
+        android:id="@+id/eventsLoader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"

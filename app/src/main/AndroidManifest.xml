@@ -23,7 +23,8 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
-        <activity android:name=".NotificationActivity"></activity>
+        <activity android:name=".PandemicActivity" />
+        <activity android:name=".NotificationActivity" />
         <activity android:name=".InfoItemActivity" />
         <activity
             android:name=".HomeActivity"

@@ -3,8 +3,10 @@ package com.brian.dmgnt;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -195,10 +197,10 @@ public class InfoItemActivity extends AppCompatActivity implements DisasterAdapt
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("Call : " + phoneNo)
                     .setPositiveButton("Proceed", ((dialog, which) -> {
-                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", phoneNo, null));
-                startActivity(intent);
-                dialog.dismiss();
-            })).setNegativeButton("Cancel", ((dialog, which) -> dialog.dismiss()));
+                        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", phoneNo, null));
+                        startActivity(intent);
+                        dialog.dismiss();
+                    })).setNegativeButton("Cancel", ((dialog, which) -> dialog.dismiss()));
             builder.create().show();
         } else {
             Toast.makeText(this, "No Contact Number available", Toast.LENGTH_SHORT).show();
@@ -212,8 +214,12 @@ public class InfoItemActivity extends AppCompatActivity implements DisasterAdapt
 
     private void showInfoDialog(String title, String extraInfo) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        TextView resultMessage = new TextView(this);
+        resultMessage.setTextSize(16);
+        resultMessage.setText(extraInfo);
+        resultMessage.setGravity(Gravity.CENTER);
         builder.setTitle(title)
-                .setMessage(extraInfo)
+                .setView(resultMessage)
                 .setPositiveButton("Ok", ((dialog, which) -> dialog.dismiss()));
         builder.show();
     }

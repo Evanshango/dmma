@@ -22,8 +22,6 @@ import com.brian.dmgnt.HomeActivity;
 import com.brian.dmgnt.R;
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.util.Objects;
-
 public class LoginFragment extends Fragment {
 
     private static final String TAG = "LoginFragment";
@@ -85,7 +83,7 @@ public class LoginFragment extends Fragment {
         Intent intent = new Intent(getContext(), HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        Objects.requireNonNull(getActivity()).finish();
+        requireActivity().finish();
     }
 
     private void navigateToRegister(NavController navController) {
