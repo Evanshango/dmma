@@ -12,17 +12,17 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class GeneralRepo {
+public class CountryRepo {
 
     private Api mApi;
 
-    public GeneralRepo() {
-        mApi = ApiService.getApiClient();
+    public CountryRepo() {
+        mApi = ApiService.getCountriesApiClient();
     }
 
-    public LiveData<GeneralResponse> getGeneralReport(){
+    public LiveData<GeneralResponse> getCountryReport(String country){
         MutableLiveData<GeneralResponse> generalResponse = new MutableLiveData<>();
-        mApi.getDailyReport().enqueue(new Callback<CovidGeneral>() {
+        mApi.getCountryReport(country).enqueue(new Callback<CovidGeneral>() {
             @Override
             public void onResponse(Call<CovidGeneral> call, Response<CovidGeneral> response) {
                 if (response.isSuccessful() && response.body() != null){
