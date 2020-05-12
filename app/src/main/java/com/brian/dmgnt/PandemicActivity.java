@@ -1,10 +1,5 @@
 package com.brian.dmgnt;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,19 +7,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.brian.dmgnt.adapters.CountryAdapter;
-import com.brian.dmgnt.models.Confirmed;
 import com.brian.dmgnt.models.Country;
 import com.brian.dmgnt.models.CovidGeneral;
-import com.brian.dmgnt.models.Deaths;
-import com.brian.dmgnt.models.Recovered;
 import com.brian.dmgnt.viewmodels.PandemicViewModel;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
