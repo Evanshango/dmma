@@ -213,7 +213,11 @@ public class EventsFragment extends Fragment implements OnMapReadyCallback,
             mapViewBundle = new Bundle();
             outState.putBundle(MAP_VIEW_BUNDLE_KEY, mapViewBundle);
         }
-        mMapView.onSaveInstanceState(mapViewBundle);
+        try {
+            mMapView.onSaveInstanceState(mapViewBundle);
+        } catch (NullPointerException ex){
+            Log.d(TAG, "onSaveInstanceState: " + ex);
+        }
     }
 
     @Override

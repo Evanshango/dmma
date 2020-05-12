@@ -76,4 +76,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-simple:1.7.25'
 
     implementation group: 'com.github.seratch', name: 'java-time-backport', version: '1.0.0'
+
+    //Chart Library
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }
