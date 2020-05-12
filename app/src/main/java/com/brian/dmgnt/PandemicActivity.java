@@ -1,24 +1,22 @@
 package com.brian.dmgnt;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.brian.dmgnt.adapters.CountryAdapter;
+import com.brian.dmgnt.dialogs.CountryDialog;
 import com.brian.dmgnt.models.Country;
 import com.brian.dmgnt.models.CovidGeneral;
 import com.brian.dmgnt.viewmodels.PandemicViewModel;
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
@@ -30,22 +28,17 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 import static com.brian.dmgnt.helpers.Constants.SHORT_DATE;
 
-public class PandemicActivity extends AppCompatActivity implements CountryAdapter.ItemInteraction {
+public class PandemicActivity extends AppCompatActivity implements CountryDialog.ItemClick {
 
-    private static final String TAG = "PandemicActivity";
     private PandemicViewModel mPandemicViewModel;
-    private CountryAdapter mCountryAdapter;
     private ProgressBar loader;
-    private List<Country> mCountries = new ArrayList<>();
-    private RecyclerView countryRecycler;
     private TextView txtInfected, infDate, txtRecovered, recDate, txtDeaths, deathsDate;
     private PieChart mPieChart;
+    private Button btnViewCountry;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,11 +49,14 @@ public class PandemicActivity extends AppCompatActivity implements CountryAdapte
 
         mPandemicViewModel = new ViewModelProvider(this).get(PandemicViewModel.class);
 
-        mCountryAdapter = new CountryAdapter(this);
-
         getGeneralInfo();
 
-//        getCountries();
+        btnViewCountry.setOnClickListener(v -> toViewCountrySpecific());
+    }
+
+    private void toViewCountrySpecific() {
+        CountryDialog countryDialog = new CountryDialog();
+        countryDialog.show(getSupportFragmentManager(), "countryDialog");
     }
 
     private void getGeneralInfo() {
@@ -70,7 +66,7 @@ public class PandemicActivity extends AppCompatActivity implements CountryAdapte
             if (generalResponse.getThrowable() == null) {
                 displayData(generalResponse.getCovidGeneral());
             } else {
-                Log.d(TAG, "getGeneralInfo: Something Went Wrong");
+                Toast.makeText(this, "Check Your Connection", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -94,7 +90,7 @@ public class PandemicActivity extends AppCompatActivity implements CountryAdapte
             int[] yData = {infected, recovered, deaths};
             String[] xData = {"Infected", "Recovered", "Deaths"};
 
-            mPieChart.getDescription().setText("Total Global Numbers");
+            mPieChart.getDescription().setText("");
             mPieChart.setHoleRadius(30f);
             mPieChart.setTransparentCircleAlpha(0);
             mPieChart.setCenterText("Global Numbers");
@@ -158,7 +154,6 @@ public class PandemicActivity extends AppCompatActivity implements CountryAdapte
 
     private void initViews() {
         loader = findViewById(R.id.loader);
-        countryRecycler = findViewById(R.id.countryRecycler);
         txtInfected = findViewById(R.id.txtInfected);
         infDate = findViewById(R.id.txtInfDate);
         txtRecovered = findViewById(R.id.txtRecovered);
@@ -166,38 +161,13 @@ public class PandemicActivity extends AppCompatActivity implements CountryAdapte
         txtDeaths = findViewById(R.id.txtDeaths);
         deathsDate = findViewById(R.id.txtDeathsDate);
         mPieChart = findViewById(R.id.globalPieChart);
-    }
-
-    private void getCountries() {
-        mPandemicViewModel.getCountries();
-        mPandemicViewModel.getCountryResponse().observe(this, countryResponse -> {
-            if (countryResponse.getThrowable() == null) {
-                loader.setVisibility(View.GONE);
-                prepareCountries(countryResponse.getCountries());
-            } else {
-                loader.setVisibility(View.GONE);
-                Toast.makeText(this, "Please check you connection", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void prepareCountries(List<Country> countries) {
-        if (countries != null) {
-            mCountries.clear();
-            mCountries.addAll(countries);
-            LinearLayoutManager manager = new LinearLayoutManager(this);
-            countryRecycler.setHasFixedSize(true);
-            countryRecycler.setLayoutManager(manager);
-
-            mCountryAdapter.setCountries(mCountries);
-            countryRecycler.setAdapter(mCountryAdapter);
-        } else {
-            Toast.makeText(this, "No Countries found", Toast.LENGTH_SHORT).show();
-        }
+        btnViewCountry = findViewById(R.id.btnViewCountry);
     }
 
     @Override
-    public void countryClick(Country country) {
-        Toast.makeText(this, "opening dialog", Toast.LENGTH_SHORT).show();
+    public void itemInteraction(Country country) {
+        Intent intent = new Intent(this, CountryStatsActivity.class);
+        intent.putExtra("countryName", country.getName());
+        startActivity(intent);
     }
 }

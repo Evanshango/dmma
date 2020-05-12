@@ -26,4 +26,8 @@
         <item name="colorAccent">@color/colorRed</item> <!-- Whatever color you want-->
     </style>
 
+    <style name="AppSearchView" parent="Widget.AppCompat.SearchView" >
+        <item name="android:textSize">12sp</item>
+    </style>
+
 </resources>
